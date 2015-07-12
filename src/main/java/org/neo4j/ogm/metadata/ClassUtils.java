@@ -18,11 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.jboss.vfs.*;
 
 /**
  * @author Vince Bickers
@@ -109,12 +111,37 @@ public abstract class ClassUtils {
                         pathFiles.add(new File(jarPath));
 
                     }
+                    else if(resource.getProtocol().equals("vfs")) {
+                        VirtualFile vf = (VirtualFile)resource.getContent();
+                        File contentsFile = findContentsFolder(vf.getPhysicalFile());
+                        File deploymentDir = contentsFile.getParentFile();
+
+                        File file = new File(deploymentDir, parseDeploymentName(resource.toExternalForm()));
+
+                        pathFiles.add(file);
+                    }
                 }
             } catch (IOException | URISyntaxException e) {
                 throw new RuntimeException(e);
             }
         }
         return pathFiles;
+    }
+
+    private static File findContentsFolder(File file) {
+        if (file.getName().equals("contents")) {
+            return file;
+        } else {
+            return findContentsFolder(file.getParentFile());
+        }
+    }
+
+    private static String parseDeploymentName(String url) {
+        if (url.endsWith(".jar") || url.endsWith(".war") || url.endsWith(".ear")) {
+            return url.substring(url.lastIndexOf("/") + 1);
+        } else {
+            return parseDeploymentName(url.substring(0, url.lastIndexOf("/")));
+        }
     }
 
 }

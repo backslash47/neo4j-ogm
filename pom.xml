@@ -79,6 +79,13 @@
             <version>${neo4j}</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.jboss</groupId>
+        	<artifactId>jboss-vfs</artifactId>
+        	<version>3.2.10.Final</version>
+        </dependency>
+
     </dependencies>
 
     <build>
